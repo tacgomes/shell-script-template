@@ -1,0 +1,107 @@
+#!/usr/bin/env sh
+
+set -eu
+
+die() {
+    printf "${RED}ERROR: %s${NOCOLOR}\n\n" "${1}" >&2
+    usage
+    exit 1
+}
+
+success() {
+    printf "${GREEN}${1}${NOCOLOR}"
+}
+
+error() {
+    printf "${RED}${1}${NOCOLOR}"
+}
+
+usage() {
+cat << EOF >&2
+Usage: ${0} [OPTIONS] POSITIONAL_ARGUMENT.. -- FORWARDING_ARGUMENT..
+
+Options:
+  --flag|-f                Some flag.
+  --choice|-c  foo|bar     Some choice.
+  --help|-h                Shows this help.
+}
+EOF
+}
+
+RED="\033[1;31m"
+GREEN="\033[1;32m"
+NOCOLOR="\033[0m"
+
+choice=no
+flag=no
+positional_arguments=
+
+while :; do
+    case "${1-noarg}" in
+        --flag)
+            flag=yes
+            ;;
+
+        --choice|-c)
+            case "${2-}" in
+            "")
+                die "argument for '--choice' option is missing"
+                ;;
+            foo|bar)
+                choice="${2}"
+                ;;
+            *)
+                die "invalid argument for '--choice' option: '${2}'"
+                ;;
+            esac
+            shift
+            ;;
+
+        --help|-h)
+            usage
+            exit 0
+            ;;
+
+        noarg)
+            break
+            ;;
+
+        --)
+            shift
+            break
+            ;;
+
+        -?*)
+            die "unknown option: '${1}'"
+            ;;
+
+        *)
+            positional_arguments="${positional_arguments}${1} "
+            ;;
+    esac
+    shift
+done
+
+case "${choice}" in
+    no)  echo "Option '--choice' was not set" ;;
+    foo) echo "Option '--choice' was set to 'foo'" ;;
+    bar) echo "Option '--choice' was set to 'bar" ;;
+esac
+
+if [ "${flag}" != "no" ]; then
+    echo "Option '--flag' was set"
+else
+    echo "Option '--flag' was not set"
+fi
+
+echo "Positional arguments: ${positional_arguments}"
+echo "Forwarding arguments: $@"
+
+success "[OK] This is an example of a success message\n"
+error "[FAIL] This is an example of an error message\n"
+
+# Example of how to create a temporary directory and ensure it is
+# deleted whether the script terminates normally, it is interrupted or
+# an error occurs.
+tempdir="$(mktemp -d)"
+trap "rm -r ${tempdir}" INT QUIT TERM EXIT
