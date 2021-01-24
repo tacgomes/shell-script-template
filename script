@@ -21,9 +21,9 @@ cat << EOF >&2
 Usage: ${0} [OPTIONS] POSITIONAL_ARGUMENT.. -- FORWARDING_ARGUMENT..
 
 Options:
-  --flag|-f                Some flag.
-  --choice|-c  foo|bar     Some choice.
-  --help|-h                Shows this help.
+  -f, --flag                Some flag.
+  -c, --choice foo|bar      Some choice.
+  -h, --help                Shows this help.
 }
 EOF
 }
